@@ -1,0 +1,529 @@
+@base = http://localhost:3000
+@contentType = application/json
+
+### Raíz
+GET {{base}}/
+
+### Login administrador
+# @name login
+POST {{base}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "ana@coworking.test",
+  "password": "Admin123!"
+}
+
+### Login cliente
+# @name loginCliente
+POST {{base}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "luis@coworking.test",
+  "password": "Cliente123!"
+}
+
+### Sin token
+GET {{base}}/api/salas
+
+### Cliente no lista usuarios
+GET {{base}}/api/usuarios
+Authorization: Bearer {{loginCliente.response.body.token}}
+
+### Registro de cliente
+POST {{base}}/api/auth/registro
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Nora",
+  "apellido": "Diaz",
+  "email": "nora@coworking.test",
+  "password": "Cliente123!"
+}
+
+### Usuario sin nombre
+POST {{base}}/api/usuarios
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "apellido": "Rojas",
+  "email": "incompleto@coworking.test",
+  "password": "Clave123!"
+}
+
+### Crear usuario
+# @name crearUsuario
+POST {{base}}/api/usuarios
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Jason",
+  "apellido": "Gutierrez",
+  "email": "jason@coworking.test",
+  "telefono": "999000111",
+  "password": "Clave123!"
+}
+
+### Correo duplicado
+POST {{base}}/api/usuarios
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Mia",
+  "apellido": "Copia",
+  "email": "mia@coworking.test",
+  "password": "Clave123!"
+}
+
+### Listar usuarios
+GET {{base}}/api/usuarios
+Authorization: Bearer {{login.response.body.token}}
+
+### Usuario inexistente
+GET {{base}}/api/usuarios/999999
+Authorization: Bearer {{login.response.body.token}}
+
+### Consultar usuario
+@usuarioId = {{crearUsuario.response.body.id}}
+GET {{base}}/api/usuarios/{{usuarioId}}
+Authorization: Bearer {{login.response.body.token}}
+
+### Actualizar usuario sin correo
+PUT {{base}}/api/usuarios/{{usuarioId}}
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Jason",
+  "apellido": "Gutierrez"
+}
+
+### Actualizar usuario
+PUT {{base}}/api/usuarios/{{usuarioId}}
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Jason",
+  "apellido": "Gutierrez 2",
+  "email": "jason.actualizado@coworking.test",
+  "telefono": "999000222"
+}
+
+### Actualizar usuario inexistente
+PUT {{base}}/api/usuarios/999999
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Nadie",
+  "apellido": "Nadie",
+  "email": "nadie@coworking.test"
+}
+
+### Crear segundo usuario para el conflicto de correo
+# @name crearOtroUsuario
+POST {{base}}/api/usuarios
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Leo",
+  "apellido": "Vega",
+  "email": "leo@coworking.test",
+  "password": "Clave123!"
+}
+
+### Correo de otro usuario
+@otroUsuarioId = {{crearOtroUsuario.response.body.id}}
+PUT {{base}}/api/usuarios/{{otroUsuarioId}}
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Leo",
+  "apellido": "Vega",
+  "email": "mia.actualizada@coworking.test"
+}
+
+### Desactivar usuario
+DELETE {{base}}/api/usuarios/{{otroUsuarioId}}
+Authorization: Bearer {{login.response.body.token}}
+
+### Desactivar usuario inexistente
+DELETE {{base}}/api/usuarios/999999
+Authorization: Bearer {{login.response.body.token}}
+
+### Sala sin capacidad válida
+POST {{base}}/api/salas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Invalida",
+  "capacidad": 0,
+  "ubicacion": "Piso 1"
+}
+
+### Crear sala
+# @name crearSala
+POST {{base}}/api/salas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Selva",
+  "capacidad": 6,
+  "ubicacion": "Piso 1",
+  "descripcion": "Sala pequeña"
+}
+
+### Listar salas
+GET {{base}}/api/salas
+Authorization: Bearer {{login.response.body.token}}
+
+### Sala inexistente
+GET {{base}}/api/salas/999999
+Authorization: Bearer {{login.response.body.token}}
+
+### Consultar sala
+@salaId = {{crearSala.response.body.id}}
+GET {{base}}/api/salas/{{salaId}}
+Authorization: Bearer {{login.response.body.token}}
+
+### Actualizar sala con capacidad inválida
+PUT {{base}}/api/salas/{{salaId}}
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Selva",
+  "capacidad": -1,
+  "ubicacion": "Piso 1"
+}
+
+### Actualizar sala
+PUT {{base}}/api/salas/{{salaId}}
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Selva",
+  "capacidad": 10,
+  "ubicacion": "Piso 4",
+  "descripcion": "Ampliada"
+}
+
+### Actualizar sala inexistente
+PUT {{base}}/api/salas/999999
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Nadie",
+  "capacidad": 2,
+  "ubicacion": "Piso 9"
+}
+
+### Crear segunda sala
+# @name crearOtraSala
+POST {{base}}/api/salas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Costa",
+  "capacidad": 4,
+  "ubicacion": "Piso 5"
+}
+
+### Desactivar sala
+@otraSalaId = {{crearOtraSala.response.body.id}}
+DELETE {{base}}/api/salas/{{otraSalaId}}
+Authorization: Bearer {{login.response.body.token}}
+
+### Desactivar sala inexistente
+DELETE {{base}}/api/salas/999999
+Authorization: Bearer {{login.response.body.token}}
+
+### Reserva con intervalo inválido
+POST {{base}}/api/reservas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "usuarioId": {{usuarioId}},
+  "salaId": {{salaId}},
+  "fechaInicio": "2026-12-01T12:00:00.000Z",
+  "fechaFin": "2026-12-01T11:00:00.000Z"
+}
+
+### Reserva con usuario inexistente
+POST {{base}}/api/reservas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "usuarioId": 999999,
+  "salaId": {{salaId}},
+  "fechaInicio": "2026-12-01T10:00:00.000Z",
+  "fechaFin": "2026-12-01T11:00:00.000Z"
+}
+
+### Reserva con usuario inactivo
+@otroUsuarioId = {{crearOtroUsuario.response.body.id}}
+POST {{base}}/api/reservas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "usuarioId": {{otroUsuarioId}},
+  "salaId": {{salaId}},
+  "fechaInicio": "2026-12-01T10:00:00.000Z",
+  "fechaFin": "2026-12-01T11:00:00.000Z"
+}
+
+### Reserva con sala inactiva
+POST {{base}}/api/reservas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "usuarioId": {{usuarioId}},
+  "salaId": {{otraSalaId}},
+  "fechaInicio": "2026-12-01T10:00:00.000Z",
+  "fechaFin": "2026-12-01T11:00:00.000Z"
+}
+
+### Crear reserva
+# @name crearReserva
+POST {{base}}/api/reservas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "usuarioId": {{usuarioId}},
+  "salaId": {{salaId}},
+  "fechaInicio": "2026-12-01T10:00:00.000Z",
+  "fechaFin": "2026-12-01T11:00:00.000Z"
+}
+
+### Horario cruzado
+POST {{base}}/api/reservas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "usuarioId": {{usuarioId}},
+  "salaId": {{salaId}},
+  "fechaInicio": "2026-12-01T10:30:00.000Z",
+  "fechaFin": "2026-12-01T11:30:00.000Z"
+}
+
+### Extremos contiguos
+POST {{base}}/api/reservas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "usuarioId": {{usuarioId}},
+  "salaId": {{salaId}},
+  "fechaInicio": "2026-12-01T11:00:00.000Z",
+  "fechaFin": "2026-12-01T12:00:00.000Z"
+}
+
+### Crear sala para el mismo horario
+# @name crearSalaHorario
+POST {{base}}/api/salas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Norte",
+  "capacidad": 5,
+  "ubicacion": "Piso 6"
+}
+
+### Mismo horario en otra sala
+@salaHorarioId = {{crearSalaHorario.response.body.id}}
+POST {{base}}/api/reservas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "usuarioId": {{usuarioId}},
+  "salaId": {{salaHorarioId}},
+  "fechaInicio": "2026-12-01T10:00:00.000Z",
+  "fechaFin": "2026-12-01T11:00:00.000Z"
+}
+
+### Listar reservas
+GET {{base}}/api/reservas
+Authorization: Bearer {{login.response.body.token}}
+
+### Filtrar reservas por sala
+GET {{base}}/api/reservas?salaId={{salaId}}
+Authorization: Bearer {{login.response.body.token}}
+
+### Filtrar reservas por usuario
+GET {{base}}/api/reservas?usuarioId={{usuarioId}}
+Authorization: Bearer {{login.response.body.token}}
+
+### Reserva inexistente
+GET {{base}}/api/reservas/999999
+Authorization: Bearer {{login.response.body.token}}
+
+### Consultar reserva
+@reservaId = {{crearReserva.response.body.id}}
+GET {{base}}/api/reservas/{{reservaId}}
+Authorization: Bearer {{login.response.body.token}}
+
+### Comentario con texto vacío
+POST {{base}}/api/reservas/{{reservaId}}/comentarios
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "texto": "   "
+}
+
+### Comentario de reserva inexistente
+POST {{base}}/api/reservas/999999/comentarios
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "texto": "No existe"
+}
+
+### Crear comentario
+POST {{base}}/api/reservas/{{reservaId}}/comentarios
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "texto": "Llegaré cinco minutos antes"
+}
+
+### Segundo comentario
+POST {{base}}/api/reservas/{{reservaId}}/comentarios
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "texto": "Confirmo el proyector"
+}
+
+### Listar comentarios
+GET {{base}}/api/reservas/{{reservaId}}/comentarios
+Authorization: Bearer {{login.response.body.token}}
+
+### Comentarios de reserva inexistente
+GET {{base}}/api/reservas/999999/comentarios
+Authorization: Bearer {{login.response.body.token}}
+
+### Cancelar reserva inexistente
+DELETE {{base}}/api/reservas/999999
+Authorization: Bearer {{login.response.body.token}}
+
+### Cancelar reserva
+DELETE {{base}}/api/reservas/{{reservaId}}
+Authorization: Bearer {{login.response.body.token}}
+
+### Volver a reservar el horario liberado
+POST {{base}}/api/reservas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "usuarioId": {{usuarioId}},
+  "salaId": {{salaId}},
+  "fechaInicio": "2026-12-01T10:00:00.000Z",
+  "fechaFin": "2026-12-01T11:00:00.000Z"
+}
+
+### Ruta inexistente
+GET {{base}}/api/no-existe
+Authorization: Bearer {{login.response.body.token}}
+
+### Flujo completo
+# @name flujoUsuario
+POST {{base}}/api/usuarios
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Flujo",
+  "apellido": "Integracion",
+  "email": "flujo@coworking.test",
+  "password": "Clave123!"
+}
+
+###
+# @name flujoSala
+POST {{base}}/api/salas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Flujo",
+  "capacidad": 3,
+  "ubicacion": "Piso 8"
+}
+
+###
+@flujoUsuarioId = {{flujoUsuario.response.body.id}}
+@flujoSalaId = {{flujoSala.response.body.id}}
+# @name flujoReserva
+POST {{base}}/api/reservas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "usuarioId": {{flujoUsuarioId}},
+  "salaId": {{flujoSalaId}},
+  "fechaInicio": "2026-12-15T09:00:00.000Z",
+  "fechaFin": "2026-12-15T10:00:00.000Z"
+}
+
+###
+POST {{base}}/api/reservas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "usuarioId": {{flujoUsuarioId}},
+  "salaId": {{flujoSalaId}},
+  "fechaInicio": "2026-12-15T09:15:00.000Z",
+  "fechaFin": "2026-12-15T09:45:00.000Z"
+}
+
+###
+@flujoReservaId = {{flujoReserva.response.body.id}}
+POST {{base}}/api/reservas/{{flujoReservaId}}/comentarios
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "texto": "Comentario del flujo"
+}
+
+###
+DELETE {{base}}/api/reservas/{{flujoReservaId}}
+Authorization: Bearer {{login.response.body.token}}
+
+###
+POST {{base}}/api/reservas
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: {{contentType}}
+
+{
+  "usuarioId": {{flujoUsuarioId}},
+  "salaId": {{flujoSalaId}},
+  "fechaInicio": "2026-12-15T09:00:00.000Z",
+  "fechaFin": "2026-12-15T10:00:00.000Z"
+}
